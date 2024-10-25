@@ -37,7 +37,7 @@ export default function Home() {
               initial={{ y: 20 }}
               animate={{ y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="max-w-4xl text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl"
+              className="max-w-4xl text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl font-mono"
             >
               Create forms that verify what
               <span className="bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent"> really matters</span>
@@ -47,9 +47,9 @@ export default function Home() {
               initial={{ y: 20 }}
               animate={{ y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="max-w-2xl text-lg text-red-100/80"
+              className="max-w-2xl text-lg text-red-100/80 font-mono"
             >
-              Build customizable forms with automatic verification of users' online credentials. From GitHub repos to social metrics - validate eligibility while preserving privacy.
+              Build customizable forms with automatic verification of users online credentials. From GitHub repos to social metrics - validate eligibility while preserving privacy.
             </motion.p>
 
             <motion.div 
@@ -116,8 +116,8 @@ export default function Home() {
                   >
                     {feature.icon}
                   </motion.div>
-                  <h3 className="text-lg font-semibold text-red-400 mb-2">{feature.title}</h3>
-                  <p className="text-red-100/70 text-sm">{feature.description}</p>
+                  <h3 className="text-lg font-semibold text-red-400 mb-2 font-mono">{feature.title}</h3>
+                  <p className="text-red-100/70 text-sm font-mono">{feature.description}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -126,7 +126,7 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.6 }}
-              className="mt-8 flex items-center justify-center gap-8 text-red-200"
+              className="mt-8 flex items-center justify-center gap-8 text-red-200 font-mono"
             >
               <motion.div 
                 whileHover={{ scale: 1.1 }}

@@ -6,56 +6,55 @@ import { FormPreview } from '@/components/FormPreview';
 import { Card } from '@/components/ui/card';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { FormSubmission } from '@/components/FormSubmission';
 
 interface FormElement {
   id: string;
-  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select';
+  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'github';
   label: string;
   options?: string[];
   required?: boolean;
+  verificationCriteria?: string;
+  githubVerificationType?: 'username' | 'email' | 'contributions' | 'repos' | 'followers';
 }
 
-export default function SharedForm() {
-  const params = useParams();
+export default function FormPage() {
+  const { formId } = useParams();
   const [formElements, setFormElements] = useState<FormElement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchForm = async () => {
-      const formId = params?.formId as string;
-      if (formId) {
-        try {
-          const docRef = doc(db, 'forms', formId);
-          const docSnap = await getDoc(docRef);
-          
-          if (docSnap.exists()) {
-            setFormElements(docSnap.data().elements);
-          } else {
-            setError("Form not found");
-          }
-        } catch (err) {
-          console.error("Error fetching form: ", err);
-          setError("Error loading form");
-        } finally {
-          setLoading(false);
+      if (typeof formId !== 'string') return;
+
+      try {
+        const docRef = doc(db, 'forms', formId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setFormElements(docSnap.data().elements);
+        } else {
+          console.log('No such document!');
         }
+      } catch (error) {
+        console.error('Error fetching form:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchForm();
-  }, [params]);
+  }, [formId]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
         <Card className="p-6 bg-red-950/30 border-red-800/50">
-          <h2 className="text-2xl font-bold text-red-100 mb-6">Shared Form</h2>
-          <FormSubmission formId={params.formId as string} elements={formElements} />
+          <h1 className="text-2xl font-bold text-red-100 mb-6">Form Submission</h1>
+          <FormPreview elements={formElements} formId={formId as string} />
         </Card>
       </div>
     </div>

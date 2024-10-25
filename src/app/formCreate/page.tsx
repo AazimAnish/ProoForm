@@ -29,10 +29,11 @@ const Draggable = dynamic(
 
 interface FormElement {
   id: string;
-  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select';
+  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'github' | 'social';
   label: string;
   options?: string[];
   required?: boolean;
+  verificationCriteria?: string;
 }
 
 export default function FormBuilder() {
@@ -129,7 +130,7 @@ export default function FormBuilder() {
                           >
                             <FormField
                               element={element}
-                              onUpdate={(updated) => {
+                              onUpdate={(updated: FormElement) => {
                                 const newElements = [...formElements];
                                 newElements[index] = updated;
                                 setFormElements(newElements);
@@ -170,7 +171,10 @@ export default function FormBuilder() {
           {/* Preview Panel */}
           <Card className="p-6 bg-red-950/30 border-red-800/50">
             <h2 className="text-2xl font-bold text-red-100 mb-6">Preview</h2>
-            <FormPreview elements={formElements} />
+            <FormPreview elements={formElements.map(element => ({
+              ...element,
+              type: element.type === 'social' ? 'text' : element.type,
+            }))} />
           </Card>
         </motion.div>
       </div>

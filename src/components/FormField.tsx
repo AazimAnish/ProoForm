@@ -20,13 +20,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Grip, Trash2, Plus, Minus } from "lucide-react";
+import { ReclaimProofRequest } from '@reclaimprotocol/js-sdk';
 
 interface FormElement {
   id: string;
-  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select';
+  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'github' | 'social';
   label: string;
   options?: string[];
   required?: boolean;
+  verificationCriteria?: string;
+  githubVerificationType?: 'username' | 'email' | 'contributions' | 'repos' | 'followers';
 }
 
 interface FormFieldProps {
@@ -79,6 +82,8 @@ export function FormField({ element, onUpdate, onDelete }: FormFieldProps) {
                 <SelectItem value="checkbox">Checkbox</SelectItem>
                 <SelectItem value="radio">Multiple Choice</SelectItem>
                 <SelectItem value="select">Dropdown</SelectItem>
+                <SelectItem value="github">GitHub Verification</SelectItem>
+                <SelectItem value="social">Social Media Verification</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -144,6 +149,54 @@ export function FormField({ element, onUpdate, onDelete }: FormFieldProps) {
                   </Button>
                 </div>
               )}
+            </div>
+          )}
+
+          {element.type === 'github' && (
+            <div className="space-y-2">
+              <Label className="text-red-200">GitHub Verification Type</Label>
+              <Select
+                value={element.githubVerificationType || ''}
+                onValueChange={(value) =>
+                  onUpdate({ ...element, githubVerificationType: value as FormElement['githubVerificationType'] })
+                }
+              >
+                <SelectTrigger className="bg-red-950/30 border-red-800/30 text-red-100">
+                  <SelectValue placeholder="Select GitHub verification type" />
+                </SelectTrigger>
+                <SelectContent className="bg-red-950 border-red-800">
+                  <SelectItem value="username">Username</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="contributions">Contributions</SelectItem>
+                  <SelectItem value="repos">Repositories</SelectItem>
+                  <SelectItem value="followers">Followers</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {element.type === 'github' && element.githubVerificationType && (
+            <div className="space-y-2">
+              <Label className="text-red-200">Verification Criteria</Label>
+              <Input
+                value={element.verificationCriteria || ''}
+                onChange={(e) => onUpdate({ ...element, verificationCriteria: e.target.value })}
+                placeholder={
+                  element.githubVerificationType === 'contributions' ||
+                  element.githubVerificationType === 'repos' ||
+                  element.githubVerificationType === 'followers'
+                    ? "Enter minimum number"
+                    : "Enter expected value"
+                }
+                type={
+                  element.githubVerificationType === 'contributions' ||
+                  element.githubVerificationType === 'repos' ||
+                  element.githubVerificationType === 'followers'
+                    ? "number"
+                    : "text"
+                }
+                className="bg-red-950/30 border-red-800/30 text-red-100"
+              />
             </div>
           )}
 

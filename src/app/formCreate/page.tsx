@@ -9,6 +9,8 @@ import { Plus, Eye, Link as LinkIcon } from "lucide-react";
 import { FormField } from "@/components/FormField"; 
 import { FormPreview } from "@/components/FormPreview"; 
 import { useRouter } from 'next/navigation';
+import { db } from '@/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 const DragDropContext = dynamic(
   () => import('react-beautiful-dnd').then(mod => mod.DragDropContext),
@@ -58,11 +60,20 @@ export default function FormBuilder() {
     setFormElements(items);
   };
 
-  const generateShareLink = () => {
+  const generateShareLink = async () => {
     const newFormId = formId || crypto.randomUUID();
     setFormId(newFormId);
-    localStorage.setItem(newFormId, JSON.stringify(formElements));
-    router.push(`/form/${newFormId}`);
+    
+    try {
+      await setDoc(doc(db, 'forms', newFormId), {
+        elements: formElements,
+        createdAt: new Date().toISOString()
+      });
+      router.push(`/form/${newFormId}`);
+    } catch (error) {
+      console.error("Error saving form: ", error);
+      // Handle error (e.g., show error message to user)
+    }
   };
 
   return (

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, Users, Sparkles, Lock } from "lucide-react";
@@ -59,14 +60,16 @@ export default function Home() {
               className="flex flex-col gap-4 sm:flex-row sm:gap-6"
             >
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  size="lg"
-                  className="bg-red-600/80 backdrop-blur-sm text-white hover:bg-red-700"
-                  onClick={() => console.log("Get Started clicked")}
-                >
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <Link href="/formCreate" passHref>
+                  <Button
+                    size="lg"
+                    className="bg-red-600/80 backdrop-blur-sm text-white hover:bg-red-700"
+                    onClick={() => console.log("Get Started clicked")}
+                  >
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button

@@ -165,7 +165,7 @@ export default function FormBuilder() {
                   {
                     id: crypto.randomUUID(),
                     type: 'text',
-                    label: 'New Field',
+                    label: '',
                   },
                 ]);
               }}

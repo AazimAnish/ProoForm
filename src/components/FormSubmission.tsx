@@ -12,6 +12,14 @@ import { collection, addDoc } from 'firebase/firestore';
 import { ReclaimProofRequest } from '@reclaimprotocol/js-sdk';
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle } from "lucide-react";
+import { QRCodeSVG } from 'qrcode.react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface FormElement {
   id: string;
@@ -39,6 +47,8 @@ const GITHUB_PROVIDER_IDS: Record<string, string> = {
 export function FormSubmission({ formId, elements }: FormSubmissionProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [proofStatus, setProofStatus] = useState<Record<string, 'idle' | 'verifying' | 'verified' | 'failed'>>({});
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
 
@@ -65,11 +75,14 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
 
     const elementId = element.id;
     setProofStatus(prev => ({ ...prev, [elementId]: 'verifying' }));
+    setIsDialogOpen(true);
 
     try {
       const providerId = GITHUB_PROVIDER_IDS[element.githubVerificationType];
       const reclaimProofRequest = await initializeReclaim(providerId);
       const requestUrl = await reclaimProofRequest.getRequestUrl();
+      setQrCodeUrl(requestUrl);
+
       await reclaimProofRequest.startSession({
         onSuccess: (proofs: any) => {
           console.log('Proof received:', proofs);
@@ -86,6 +99,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
 
           setProofStatus(prev => ({ ...prev, [elementId]: isVerified ? 'verified' : 'failed' }));
           setFormData(prev => ({ ...prev, [elementId]: proofValue }));
+          setIsDialogOpen(false);
           toast({
             title: isVerified ? "Verification Successful" : "Verification Failed",
             description: isVerified 
@@ -97,6 +111,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
         onError: (error: Error) => {
           console.error('Verification failed', error);
           setProofStatus(prev => ({ ...prev, [elementId]: 'failed' }));
+          setIsDialogOpen(false);
           toast({
             title: "Verification Failed",
             description: `Failed to verify your GitHub ${element.githubVerificationType}. Please try again.`,
@@ -104,11 +119,10 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
           });
         }
       });
-
-      window.open(requestUrl, '_blank');
     } catch (error) {
       console.error('Verification process failed', error);
       setProofStatus(prev => ({ ...prev, [elementId]: 'failed' }));
+      setIsDialogOpen(false);
       toast({
         title: "Verification Error",
         description: "An error occurred during the verification process. Please try again later.",
@@ -228,6 +242,32 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
       <Button type="submit" className="bg-red-600 hover:bg-red-700 text-white">
         Submit
       </Button>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Scan QR Code to Prove</DialogTitle>
+            <DialogDescription>
+              Scan this QR code with your mobile device to complete the verification process.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-4">
+            {qrCodeUrl ? (
+              <QRCodeSVG value={qrCodeUrl} size={256} />
+            ) : (
+              <div className="text-center">
+                <p className="text-lg font-semibold mb-2">Generating QR Code...</p>
+                <p className="text-sm text-gray-500">Please wait while we prepare your verification.</p>
+              </div>
+            )}
+          </div>
+          <div className="text-center mt-4">
+            <p className="text-sm text-gray-500 animate-pulse">
+              Waiting for proof...
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }

@@ -4,12 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus, Eye, Link as LinkIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Eye, Link as LinkIcon, Copy } from "lucide-react";
 import { FormField } from "@/components/FormField"; 
 import { FormPreview } from "@/components/FormPreview"; 
-import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import { useToast } from "@/hooks/use-toast";
 
 interface FormElement {
   id: string;
@@ -24,18 +25,23 @@ export default function FormBuilder() {
   const [formElements, setFormElements] = useState<FormElement[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [formId, setFormId] = useState<string | null>(null);
-  const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
+  const [shareLink, setShareLink] = useState<string>('');
+  const { toast } = useToast();
 
+  // Client-side initialization
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  if (!isClient) {
-    return null; // or a loading spinner
-  }
+  // Share link update
+  useEffect(() => {
+    if (formId && isClient) {
+      setShareLink(`${window.location.origin}/form/${formId}`);
+    }
+  }, [formId, isClient]);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     dragItem.current = index;
@@ -91,25 +97,75 @@ export default function FormBuilder() {
         elements: formElements,
         createdAt: new Date().toISOString()
       });
-      router.push(`/form/${newFormId}`);
+      setShareLink(`${window.location.origin}/form/${newFormId}`);
     } catch (error) {
       console.error("Error saving form: ", error);
-      // Handle error (e.g., show error message to user)
+      toast({
+        title: "Error",
+        description: "Failed to generate share link. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      toast({
+        title: "Link Copied",
+        description: "Form share link has been copied to clipboard.",
+      });
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy link. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (!isClient) {
+    return null; // or a loading spinner
+  }
+
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black font-mono">
       <div className="container mx-auto px-4 py-8">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+          transition={{ duration: 0.5 }}
+          className="space-y-8"
         >
-          {/* Form Builder Panel */}
+          <h1 className="text-3xl font-bold text-red-500">Form Builder</h1>
+          
+          {/* Share Link Section */}
+          {formId && (
+            <Card className="p-6 bg-red-950/30 border-red-800/50">
+              <h2 className="text-xl font-semibold text-white mb-4">Share Form</h2>
+              <div className="flex items-center space-x-2">
+                <Input 
+                  value={shareLink}
+                  readOnly
+                  className="bg-red-950/30 border-red-800/30 text-white"
+                />
+                <Button
+                  onClick={copyToClipboard}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy
+                </Button>
+              </div>
+              <p className="text-sm text-white mt-2">Share this link to allow others to fill out your form.</p>
+            </Card>
+          )}
+
+          {/* Form Builder Card */}
           <Card className="p-6 bg-red-950/30 border-red-800/50">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-red-100">Form Builder</h2>
+              <h2 className="text-2xl font-bold text-white">Form Builder</h2>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -177,7 +233,7 @@ export default function FormBuilder() {
 
           {/* Preview Panel */}
           <Card className="p-6 bg-red-950/30 border-red-800/50">
-            <h2 className="text-2xl font-bold text-red-100 mb-6">Preview</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Preview</h2>
             <FormPreview elements={formElements.map(element => ({
               ...element,
               type: element.type === 'social' ? 'text' : element.type,

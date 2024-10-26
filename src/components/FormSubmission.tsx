@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +36,8 @@ interface FormSubmissionProps {
   elements: FormElement[];
 }
 
+const APP_ID = process.env.NEXT_PUBLIC_RECLAIM_APP_ID || '';
+const APP_SECRET = process.env.NEXT_PUBLIC_RECLAIM_APP_SECRET || '';
 const GITHUB_PROVIDER_IDS: Record<string, string> = {
   username: process.env.NEXT_PUBLIC_GITHUB_PROVIDER_USERNAME || '',
   email: process.env.NEXT_PUBLIC_GITHUB_PROVIDER_EMAIL || '',
@@ -50,23 +52,13 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  if (!isClient) {
-    return null; // or a loading spinner
-  }
+  const [currentElement, setCurrentElement] = useState<FormElement | null>(null);
 
   const handleInputChange = (id: string, value: any) => {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
   const initializeReclaim = async (providerId: string) => {
-    const APP_ID = process.env.NEXT_PUBLIC_RECLAIM_APP_ID || '';
-    const APP_SECRET = process.env.NEXT_PUBLIC_RECLAIM_APP_SECRET || '';
     return await ReclaimProofRequest.init(APP_ID, APP_SECRET, providerId);
   };
 
@@ -76,6 +68,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
     const elementId = element.id;
     setProofStatus(prev => ({ ...prev, [elementId]: 'verifying' }));
     setIsDialogOpen(true);
+    setCurrentElement(element);
 
     try {
       const providerId = GITHUB_PROVIDER_IDS[element.githubVerificationType];
@@ -86,9 +79,17 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
       await reclaimProofRequest.startSession({
         onSuccess: (proofs: any) => {
           console.log('Proof received:', proofs);
-          const proofValue = proofs?.parameters?.value;
-          
+          let proofValue: string;
           let isVerified = false;
+
+          if (typeof proofs === 'string') {
+            // Handle custom callback URL case
+            proofValue = proofs;
+          } else {
+            // Handle default callback URL case
+            proofValue = proofs?.claimData?.parameters?.value || '';
+          }
+
           if (element.githubVerificationType === 'username' || element.githubVerificationType === 'email') {
             isVerified = proofValue === element.verificationCriteria;
           } else {
@@ -98,13 +99,20 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
           }
 
           setProofStatus(prev => ({ ...prev, [elementId]: isVerified ? 'verified' : 'failed' }));
-          setFormData(prev => ({ ...prev, [elementId]: proofValue }));
+          setFormData(prev => ({ 
+            ...prev, 
+            [elementId]: {
+              value: proofValue,
+              isVerified: isVerified,
+              proof: proofs // Store the entire proof object
+            }
+          }));
           setIsDialogOpen(false);
           toast({
             title: isVerified ? "Verification Successful" : "Verification Failed",
             description: isVerified 
-              ? `Your GitHub ${element.githubVerificationType} has been verified.`
-              : `Your GitHub ${element.githubVerificationType} does not meet the criteria.`,
+              ? `Your GitHub ${element.githubVerificationType} (${proofValue}) meets the criteria.`
+              : `Your GitHub ${element.githubVerificationType} (${proofValue}) does not meet the criteria (${element.verificationCriteria}).`,
             variant: isVerified ? "default" : "destructive",
           });
         },
@@ -134,9 +142,22 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const formDataToSubmit = Object.entries(formData).reduce((acc, [key, value]) => {
+        if (typeof value === 'object' && 'isVerified' in value) {
+          acc[key] = {
+            value: value.value,
+            isVerified: value.isVerified,
+            status: proofStatus[key],
+            proof: value.proof // Include the proof in the submission
+          };
+        } else {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as Record<string, any>);
+
       await addDoc(collection(db, 'forms', formId, 'submissions'), {
-        ...formData,
-        proofStatus,
+        ...formDataToSubmit,
         submittedAt: new Date().toISOString()
       });
       toast({
@@ -263,7 +284,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
           </div>
           <div className="text-center mt-4">
             <p className="text-sm text-gray-500 animate-pulse">
-              Waiting for proof...
+              Waiting for proof... This might take a moment.
             </p>
           </div>
         </DialogContent>

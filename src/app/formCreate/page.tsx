@@ -53,7 +53,7 @@ export default function FormBuilder() {
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     dragOverItem.current = index;
     e.preventDefault();
-    e.currentTarget.style.borderTop = "2px solid #ff0000";
+    e.currentTarget.style.borderTop = "2px solid #3b82f6"; // Changed to blue
   };
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
@@ -138,21 +138,21 @@ export default function FormBuilder() {
           transition={{ duration: 0.5 }}
           className="space-y-8"
         >
-          <h1 className="text-3xl font-bold text-red-500">Form Builder</h1>
+          <h1 className="text-3xl font-bold text-blue-500">Form Builder</h1> // Changed to blue
           
           {/* Share Link Section */}
           {formId && (
-            <Card className="p-6 bg-red-950/30 border-red-800/50">
+            <Card className="p-6 bg-blue-950/30 border-blue-800/50"> // Changed to blue
               <h2 className="text-xl font-semibold text-white mb-4">Share Form</h2>
               <div className="flex items-center space-x-2">
                 <Input 
                   value={shareLink}
                   readOnly
-                  className="bg-red-950/30 border-red-800/30 text-white"
+                  className="bg-blue-950/30 border-blue-800/30 text-white" // Changed to blue
                 />
                 <Button
                   onClick={copyToClipboard}
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white" // Changed to blue
                 >
                   <Copy className="w-4 h-4 mr-2" />
                   Copy
@@ -163,20 +163,20 @@ export default function FormBuilder() {
           )}
 
           {/* Form Builder Card */}
-          <Card className="p-6 bg-red-950/30 border-red-800/50">
+          <Card className="p-6 bg-blue-950/30 border-blue-800/50"> // Changed to blue
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-white">Form Builder</h2>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  className="border-red-800/50 text-red-500"
+                  className="border-blue-800/50 text-blue-500" // Changed to blue
                   onClick={() => setShowPreview(!showPreview)}
                 >
                   <Eye className="w-4 h-4 mr-2" />
                   Preview
                 </Button>
                 <Button
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white" // Changed to blue
                   onClick={generateShareLink}
                 >
                   <LinkIcon className="w-4 h-4 mr-2" />
@@ -214,7 +214,7 @@ export default function FormBuilder() {
             </div>
 
             <Button
-              className="w-full mt-4 bg-red-600/80 hover:bg-red-700 text-white"
+              className="w-full mt-4 bg-blue-600/80 hover:bg-blue-700 text-white" // Changed to blue
               onClick={() => {
                 setFormElements([
                   ...formElements,
@@ -232,7 +232,7 @@ export default function FormBuilder() {
           </Card>
 
           {/* Preview Panel */}
-          <Card className="p-6 bg-red-950/30 border-red-800/50">
+          <Card className="p-6 bg-blue-950/30 border-blue-800/50"> // Changed to blue
             <h2 className="text-2xl font-bold text-white mb-6">Preview</h2>
             <FormPreview elements={formElements.map(element => ({
               ...element,

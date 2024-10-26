@@ -52,8 +52,8 @@ export default function FormPage() {
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
-        <Card className="p-6 bg-red-950/30 border-red-800/50">
-          <h1 className="text-2xl font-bold text-red-100 mb-6">Form Submission</h1>
+        <Card className="p-6 bg-blue-950/30 border-blue-800/50">
+          <h1 className="text-2xl font-bold text-blue-100 mb-6">Form Submission</h1>
           <FormPreview elements={formElements} formId={formId as string} />
         </Card>
       </div>

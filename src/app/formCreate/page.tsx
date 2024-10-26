@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plus, Eye, Link as LinkIcon } from "lucide-react";
@@ -11,21 +10,6 @@ import { FormPreview } from "@/components/FormPreview";
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
-
-const DragDropContext = dynamic(
-  () => import('react-beautiful-dnd').then(mod => mod.DragDropContext),
-  { ssr: false }
-);
-
-const Droppable = dynamic(
-  () => import('react-beautiful-dnd').then(mod => mod.Droppable),
-  { ssr: false }
-);
-
-const Draggable = dynamic(
-  () => import('react-beautiful-dnd').then(mod => mod.Draggable),
-  { ssr: false }
-);
 
 interface FormElement {
   id: string;
@@ -42,6 +26,8 @@ export default function FormBuilder() {
   const [formId, setFormId] = useState<string | null>(null);
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -51,14 +37,49 @@ export default function FormBuilder() {
     return null; // or a loading spinner
   }
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-    
-    const items = Array.from(formElements);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    
-    setFormElements(items);
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    dragItem.current = index;
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/html", e.currentTarget.innerHTML);
+    e.currentTarget.style.opacity = "0.5";
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    dragOverItem.current = index;
+    e.preventDefault();
+    e.currentTarget.style.borderTop = "2px solid #ff0000";
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.currentTarget.style.borderTop = "";
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    e.currentTarget.style.opacity = "1";
+    e.currentTarget.style.borderTop = "";
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    e.currentTarget.style.borderTop = "";
+    const draggedItemIndex = dragItem.current;
+    const targetIndex = index;
+
+    if (draggedItemIndex === null || targetIndex === draggedItemIndex) return;
+
+    const newFormElements = [...formElements];
+    const draggedItem = newFormElements[draggedItemIndex];
+    newFormElements.splice(draggedItemIndex, 1);
+    newFormElements.splice(targetIndex, 0, draggedItem);
+
+    setFormElements(newFormElements);
+    dragItem.current = null;
+    dragOverItem.current = null;
   };
 
   const generateShareLink = async () => {
@@ -108,47 +129,33 @@ export default function FormBuilder() {
               </div>
             </div>
 
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="form-elements">
-                {(provided) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className="space-y-4"
-                  >
-                    {formElements.map((element, index) => (
-                      <Draggable
-                        key={element.id}
-                        draggableId={element.id}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            <FormField
-                              element={element}
-                              onUpdate={(updated: FormElement) => {
-                                const newElements = [...formElements];
-                                newElements[index] = updated;
-                                setFormElements(newElements);
-                              }}
-                              onDelete={() => {
-                                const newElements = formElements.filter((_, i) => i !== index);
-                                setFormElements(newElements);
-                              }}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+            <div className="space-y-4">
+              {formElements.map((element, index) => (
+                <div
+                  key={element.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragEnter={(e) => handleDragEnter(e, index)}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDragEnd={handleDragEnd}
+                  onDrop={(e) => handleDrop(e, index)}
+                >
+                  <FormField
+                    element={element}
+                    onUpdate={(updated: FormElement) => {
+                      const newElements = [...formElements];
+                      newElements[index] = updated;
+                      setFormElements(newElements);
+                    }}
+                    onDelete={() => {
+                      const newElements = formElements.filter((_, i) => i !== index);
+                      setFormElements(newElements);
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
 
             <Button
               className="w-full mt-4 bg-red-600/80 hover:bg-red-700 text-white"

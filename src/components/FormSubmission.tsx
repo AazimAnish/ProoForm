@@ -122,6 +122,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
     try {
       await addDoc(collection(db, 'forms', formId, 'submissions'), {
         ...formData,
+        proofStatus,
         submittedAt: new Date().toISOString()
       });
       toast({
@@ -198,14 +199,6 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
           )}
           {element.type === 'github' && (
             <div className="space-y-2">
-              <Input
-                required={element.required}
-                className="bg-red-950/30 border-red-800/30 text-red-100"
-                placeholder={`Enter ${element.label.toLowerCase()}`}
-                value={formData[element.id] || ''}
-                onChange={(e) => handleInputChange(element.id, e.target.value)}
-                disabled={proofStatus[element.id] === 'verified'}
-              />
               <Button
                 type="button"
                 className={`${

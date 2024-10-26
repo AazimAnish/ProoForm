@@ -20,7 +20,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Grip, Trash2, Plus, Minus } from "lucide-react";
-import { ReclaimProofRequest } from '@reclaimprotocol/js-sdk';
 
 interface FormElement {
   id: string;
@@ -30,6 +29,7 @@ interface FormElement {
   required?: boolean;
   verificationCriteria?: string;
   githubVerificationType?: 'username' | 'email' | 'contributions' | 'repos' | 'followers';
+  socialVerificationType?: 'twitter_followers' | 'instagram_story_views' | 'instagram_followers';
 }
 
 interface FormFieldProps {
@@ -175,30 +175,56 @@ export function FormField({ element, onUpdate, onDelete }: FormFieldProps) {
             </div>
           )}
 
-          {element.type === 'github' && element.githubVerificationType && (
+          {element.type === 'social' && (
+            <div className="space-y-2">
+              <Label className="text-red-200">Social Media Verification Type</Label>
+              <Select
+                value={element.socialVerificationType || ''}
+                onValueChange={(value) =>
+                  onUpdate({ ...element, socialVerificationType: value as FormElement['socialVerificationType'] })
+                }
+              >
+                <SelectTrigger className="bg-red-950/30 border-red-800/30 text-red-100">
+                  <SelectValue placeholder="Select social media verification type" />
+                </SelectTrigger>
+                <SelectContent className="bg-red-950 border-red-800">
+                  <SelectItem value="twitter_followers">Twitter Followers</SelectItem>
+                  <SelectItem value="instagram_story_views">Instagram Story Views</SelectItem>
+                  <SelectItem value="instagram_followers">Instagram Followers</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {(element.type === 'github' && element.githubVerificationType) || 
+           (element.type === 'social' && element.socialVerificationType) ? (
             <div className="space-y-2">
               <Label className="text-red-200">Verification Criteria</Label>
               <Input
                 value={element.verificationCriteria || ''}
                 onChange={(e) => onUpdate({ ...element, verificationCriteria: e.target.value })}
                 placeholder={
-                  element.githubVerificationType === 'contributions' ||
-                  element.githubVerificationType === 'repos' ||
-                  element.githubVerificationType === 'followers'
+                  element.type === 'github' && (
+                    element.githubVerificationType === 'contributions' ||
+                    element.githubVerificationType === 'repos' ||
+                    element.githubVerificationType === 'followers'
+                  ) || element.type === 'social'
                     ? "Enter minimum number"
                     : "Enter expected value"
                 }
                 type={
-                  element.githubVerificationType === 'contributions' ||
-                  element.githubVerificationType === 'repos' ||
-                  element.githubVerificationType === 'followers'
+                  element.type === 'github' && (
+                    element.githubVerificationType === 'contributions' ||
+                    element.githubVerificationType === 'repos' ||
+                    element.githubVerificationType === 'followers'
+                  ) || element.type === 'social'
                     ? "number"
                     : "text"
                 }
                 className="bg-red-950/30 border-red-800/30 text-red-100"
               />
             </div>
-          )}
+          ) : null}
 
           <div className="flex items-center justify-between">
             <Label className="text-red-200">Required Field</Label>

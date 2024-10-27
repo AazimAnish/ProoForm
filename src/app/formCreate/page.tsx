@@ -33,12 +33,10 @@ export default function FormBuilder() {
   const [shareLink, setShareLink] = useState<string>('');
   const { toast } = useToast();
 
-  // Client-side initialization
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Share link update
   useEffect(() => {
     if (formId && isClient) {
       setShareLink(`${window.location.origin}/form/${formId}`);
@@ -55,7 +53,7 @@ export default function FormBuilder() {
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     dragOverItem.current = index;
     e.preventDefault();
-    e.currentTarget.style.borderTop = "2px solid #3b82f6"; // Changed to blue
+    e.currentTarget.style.borderTop = "2px solid #3b82f6";
   };
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
@@ -140,21 +138,21 @@ export default function FormBuilder() {
           transition={{ duration: 0.5 }}
           className="space-y-8"
         >
-          <h1 className="text-3xl font-bold text-blue-500">Form Builder</h1> // Changed to blue
+          <h1 className="text-3xl font-bold text-blue-500">Form Builder</h1>
           
           {/* Share Link Section */}
           {formId && (
-            <Card className="p-6 bg-blue-950/30 border-blue-800/50"> // Changed to blue
+            <Card className="p-6 bg-blue-950/30 border-blue-800/50">
               <h2 className="text-xl font-semibold text-white mb-4">Share Form</h2>
               <div className="flex items-center space-x-2">
                 <Input 
                   value={shareLink}
                   readOnly
-                  className="bg-blue-950/30 border-blue-800/30 text-white" // Changed to blue
+                  className="bg-blue-950/30 border-blue-800/30 text-white"
                 />
                 <Button
                   onClick={copyToClipboard}
-                  className="bg-blue-600 hover:bg-blue-700 text-white" // Changed to blue
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <Copy className="w-4 h-4 mr-2" />
                   Copy
@@ -220,7 +218,7 @@ export default function FormBuilder() {
             </div>
 
             <Button
-              className="w-full mt-4 bg-blue-600/80 hover:bg-blue-700 text-white" // Changed to blue
+              className="w-full mt-4 bg-blue-600/80 hover:bg-blue-700 text-white"
               onClick={() => {
                 setFormElements([
                   ...formElements,

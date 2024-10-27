@@ -445,7 +445,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
             </Button>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[425px] bg-white">
                     <DialogHeader>
                         <DialogTitle>Scan QR Code to Prove</DialogTitle>
                         <DialogDescription>

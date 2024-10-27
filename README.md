@@ -1,36 +1,184 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ProofForm 🚀
 
-## Getting Started
+ProofForm is an innovative, open-source form-building platform that integrates identity verification capabilities using Reclaim Protocol. Create custom forms with built-in verification for GitHub contributions, social media metrics, and more - all while preserving user privacy! 🔐
 
-First, run the development server:
+## Demo 🎥
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+[Watch ProofForm in Action](#) <!-- Add your demo video link here -->
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features ✨
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+📝 **Custom Form Builder**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Standard form fields (text, dropdowns, checkboxes)
 
-## Learn More
+- Verification fields for proof-based criteria
 
-To learn more about Next.js, take a look at the following resources:
+- Real-time form preview
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Responsive design for all devices
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+🛡️ **Secure Verification** 
 
-## Deploy on Vercel
+- Privacy-first approach using Reclaim Protocol
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- No direct access to user's private data
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Automated verification process
+
+- Tamper-proof results
+
+🔗 **Easy Sharing** 
+
+- Unique link for each form
+
+- Dynamic routing
+
+- Instant form access
+
+- Public/Private form options
+
+## Currently Supported Platforms 🌐
+
+### Developer Platforms
+
+- [x] **GitHub**
+  - Profile data
+  - Email verification
+  - Contribution count
+  - Repository count
+  - Followers count
+
+- [x] **LeetCode**
+  - Problem-solving count
+  - Streak verification
+
+- [x] **CodeChef**
+  - Ranking verification
+
+### Social Media Platforms
+
+- [x] **Twitter**
+  - Follower metrics
+
+- [x] **Instagram**
+  - Story views
+  - Follower count
+
+- [x] **LinkedIn**
+  - Post impressions
+
+- [x] **YouTube**
+  - Video views
+
+---
+
+### Future Platform Integrations 🔮
+
+- [ ] **Discord**
+- [ ] **Stack Overflow**
+- [ ] **Medium**
+- [ ] **Behance**
+- [ ] **Dribbble**
+- [ ] **Twitch**
+- [ ] **Facebook**
+- [ ] **Dev.to**
+- [ ] **HashNode**
+- [ ] **GitLab**
+
+...and many more to come! 🚀
+
+
+## Use Cases 🎯
+
+- **Event Organizers**: Verify participant eligibility for hackathons
+
+- **Marketing Teams**: Validate influencer metrics
+
+- **Recruiters**: Authenticate developer credentials
+
+- **Freelancers**: Showcase verified achievements
+
+- **Communities**: Manage member verification
+
+## Tech Stack 💻
+
+- Next.js
+
+- React
+
+- Reclaim Protocol
+
+- TypeScript
+
+- Tailwind CSS
+
+- shadcn/ui
+
+- Node.js
+
+## Let's Build Together! 🤝
+
+Hey awesome developers! We're super excited about building ProofForm and would love to have you join us on this journey! 🚀
+
+### Why Contribute? 
+
+- 🌱 Work on cutting-edge identity verification technology
+
+- 💡 Implement creative solutions for real-world problems
+
+- 🤝 Join a growing community of passionate developers
+
+- ⭐ Get early contributor access and recognition
+
+- 📈 Help shape the future of form verification
+
+### We're Looking For:
+
+- 👩‍💻 Frontend Developers (React/Next.js)
+
+- 👨‍💻 Backend Developers (Node.js)
+
+- 🎨 UI/UX Designers
+
+- 📝 Technical Writers
+
+- 🌍 Localization Experts
+
+- 🧪 QA Engineers
+
+### How to Start?
+
+1\. Star the repository ⭐
+
+2\. Join our [Telegram Community](#) <!-- Add your Discord link -->
+
+3\. Check our [Contributing Guidelines](CONTRIBUTING.md)
+
+4\. Pick an issue and start coding!
+
+### Priority Areas:
+
+- Adding new verification providers
+
+- Enhancing form builder functionality
+
+- Improving UI/UX
+
+- Adding localization support
+
+- Writing documentation
+
+- Fixing bugs
+
+## Support 🤔
+
+Having issues? Let us know in the Issues section of the repository or join our [Telegram community](#) for real-time help!
+
+## License 📄
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+---
+
+Built with ❤️ by the ProofForm Community

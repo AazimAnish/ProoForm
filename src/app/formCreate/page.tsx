@@ -174,6 +174,17 @@ export default function FormBuilder() {
                         </Card>
                     )}
 
+                    {/* Add this button next to your existing Share button */}
+                    {formId && (
+                        <Button
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            onClick={() => router.push(`/submissions/${formId}`)}
+                        >
+                            <Eye className="w-4 h-4 mr-2" />
+                            View Submissions
+                        </Button>
+                    )}
+
                     {/* Form Builder Card */}
                     <Card className="p-6 bg-blue-950/30 border-blue-800/50">
                         <div className="flex justify-between items-center mb-6">

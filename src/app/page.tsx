@@ -30,7 +30,7 @@ export default function Home() {
               whileTap={{ scale: 0.95 }}
               className="inline-flex items-center gap-2 rounded-full border border-blue-800 bg-blue-950/30 backdrop-blur-sm px-4 py-2 text-sm text-blue-200"
             >
-              <span>Forms, but make them trustless ✨</span>
+              <span>Unlock Trust with ProoForm ✨</span>
               <ArrowRight className="h-4 w-4" />
             </motion.div>
 
@@ -40,8 +40,8 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="max-w-4xl text-3xl md:text-4xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white font-mono"
             >
-              Trust through
-              <span className="bg-gradient-to-r from-blue-500 to-blue-300 bg-clip-text text-transparent"> verification</span>
+              Prove your skills,
+              <span className="bg-gradient-to-r from-blue-500 to-blue-300 bg-clip-text text-transparent"> not just stories.</span>
             </motion.h1>
 
             <motion.p 
@@ -50,8 +50,13 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="max-w-2xl text-base md:text-lg text-blue-100/80 font-mono px-4"
             >
-              Because sometimes you need proof that someone's actually got the skills they say they do. 
-              We verify it all, keeping it private and simple.
+              Verify your achievements with zero-knowledge proof by <motion.span 
+                whileHover={{ scale: 1.05 }}
+                className="bg-gradient-to-r from-blue-500 to-white bg-clip-text text-transparent animate-gradient-x"
+              >Reclaim Protocol</motion.span>. Keep your data safe and private.
+              {/* <div className="mt-2 p-4 rounded-lg bg-white/10 backdrop-blur-md">
+                <p className="text-sm text-blue-200">Powered by Reclaim Protocol</p>
+              </div> */}
             </motion.p>
 
             <motion.div 

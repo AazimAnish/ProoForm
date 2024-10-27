@@ -12,14 +12,16 @@ import { db } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 
-interface FormElement {
-  id: string;
-  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'github' | 'social';
-  label: string;
-  options?: string[];
-  required?: boolean;
-  verificationCriteria?: string;
-}
+export interface FormElement {
+    id: string;
+    type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'developer' | 'social';
+    label: string;
+    options?: string[];
+    required?: boolean;
+    verificationCriteria?: string;
+    developerVerificationType?: 'github_followers' | 'github_email' | 'github_contributions' | 'github_repos' | 'leetcode_problems' | 'leetcode_streak' | 'codechef_ranking';
+    socialVerificationType?: 'linkedin_impressions' | 'youtube_views' | 'twitter_followers' | 'instagram_story_views' | 'instagram_followers';
+  }
 
 export default function FormBuilder() {
   const [formElements, setFormElements] = useState<FormElement[]>([]);
@@ -199,7 +201,7 @@ export default function FormBuilder() {
                 >
                   <FormField
                     element={element}
-                    onUpdate={(updated: FormElement) => {
+                    onUpdate={(updated) => {
                       const newElements = [...formElements];
                       newElements[index] = updated;
                       setFormElements(newElements);
@@ -234,10 +236,7 @@ export default function FormBuilder() {
           {/* Preview Panel */}
           <Card className="p-6 bg-blue-950/30 border-blue-800/50"> // Changed to blue
             <h2 className="text-2xl font-bold text-white mb-6">Preview</h2>
-            <FormPreview elements={formElements.map(element => ({
-              ...element,
-              type: element.type === 'social' ? 'text' : element.type,
-            }))} />
+            <FormPreview elements={formElements} />
           </Card>
         </motion.div>
       </div>

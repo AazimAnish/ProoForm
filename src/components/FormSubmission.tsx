@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,13 +22,13 @@ import { Label } from "@/components/ui/label";
 
 interface FormElement {
     id: string;
-    type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'github' | 'social';
+    type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'developer' | 'social';
     label: string;
     options?: string[];
     required?: boolean;
     verificationCriteria?: string;
-    githubVerificationType?: 'username' | 'email' | 'contributions' | 'repos' | 'followers';
-    socialVerificationType?: 'twitter_followers' | 'instagram_story_views' | 'instagram_followers';
+    developerVerificationType?: 'github_followers' | 'github_email' | 'github_contributions' | 'github_repos' | 'leetcode_problems' | 'leetcode_streak' | 'codechef_ranking';
+    socialVerificationType?: 'twitter_followers' | 'instagram_story_views' | 'instagram_followers' | 'linkedin_impressions' | 'youtube_views';
 }
 
 interface FormSubmissionProps {
@@ -46,14 +46,21 @@ interface ProofDetails {
 const APP_ID = process.env.NEXT_PUBLIC_RECLAIM_APP_ID || '';
 const APP_SECRET = process.env.NEXT_PUBLIC_RECLAIM_APP_SECRET || '';
 const PROVIDER_IDS: Record<string, string> = {
-    github_username: process.env.NEXT_PUBLIC_GITHUB_PROVIDER_USERNAME || '',
+    // Developer verification providers
+    github_followers: process.env.NEXT_PUBLIC_GITHUB_PROVIDER_FOLLOWERS || '',
     github_email: process.env.NEXT_PUBLIC_GITHUB_PROVIDER_EMAIL || '',
     github_contributions: process.env.NEXT_PUBLIC_GITHUB_PROVIDER_CONTRIBUTIONS || '',
     github_repos: process.env.NEXT_PUBLIC_GITHUB_PROVIDER_REPOS || '',
-    github_followers: process.env.NEXT_PUBLIC_GITHUB_PROVIDER_FOLLOWERS || '',
+    leetcode_problems: process.env.NEXT_PUBLIC_LEETCODE_PROVIDER_PROBLEMS || '',
+    leetcode_streak: process.env.NEXT_PUBLIC_LEETCODE_PROVIDER_STREAK || '',
+    codechef_ranking: process.env.NEXT_PUBLIC_CODECHEF_PROVIDER_RANKING || '',
+    
+    // Social media verification providers
     twitter_followers: process.env.NEXT_PUBLIC_TWITTER_FOLLOWERS_COUNT || '',
     instagram_story_views: process.env.NEXT_PUBLIC_INSTAGRAM_STORY_VIEW || '',
     instagram_followers: process.env.NEXT_PUBLIC_INSTAGRAM_FOLLOWERS_COUNT || '',
+    linkedin_impressions: process.env.NEXT_PUBLIC_LINKEDIN_IMPRESSIONS || '',
+    youtube_views: process.env.NEXT_PUBLIC_YOUTUBE_VIEWS || '',
 };
 
 export function FormSubmission({ formId, elements }: FormSubmissionProps) {
@@ -77,19 +84,22 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
             const context = JSON.parse(proofs.claimData.context);
             const extractedParams = context.extractedParameters;
 
-            if (element.type === 'github') {
-                switch (element.githubVerificationType) {
-                    case 'contributions':
-                        // Clean the contributions value properly
+            if (element.type === 'developer') {
+                switch (element.developerVerificationType) {
+                    case 'github_contributions':
                         const contributionsStr = extractedParams.contributions || '';
                         return parseInt(contributionsStr.replace(/\D/g, ''), 10);
-                    case 'repos':
+                    case 'github_repos':
                         return parseInt(extractedParams.repos || '0', 10);
-                    case 'followers':
+                    case 'github_followers':
                         return parseInt(extractedParams.followers || '0', 10);
-                    case 'username':
-                        return extractedParams.username || '';
-                    case 'email':
+                    case 'leetcode_problems':
+                        return parseInt(extractedParams.problems || '0', 10);
+                    case 'leetcode_streak':
+                        return parseInt(extractedParams.streak || '0', 10);
+                    case 'codechef_ranking':
+                        return parseInt(extractedParams.ranking || '0', 10);
+                    case 'github_email':
                         return extractedParams.email || '';
                     default:
                         return '';
@@ -108,31 +118,32 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
     const verifyProof = (element: FormElement, proofValue: string | number): boolean => {
         if (!element.verificationCriteria) return false;
 
-        if (element.type === 'github') {
-            switch (element.githubVerificationType) {
-                case 'username':
-                case 'email':
+        if (element.type === 'developer' || element.type === 'social') {
+            switch (element.developerVerificationType || element.socialVerificationType) {
+                case 'github_email':
                     return String(proofValue).toLowerCase() === element.verificationCriteria.toLowerCase();
-                case 'contributions':
-                case 'repos':
-                case 'followers':
+                case 'github_contributions':
+                case 'github_repos':
+                case 'github_followers':
+                case 'leetcode_problems':
+                case 'leetcode_streak':
+                case 'codechef_ranking':
+                case 'twitter_followers':
+                case 'instagram_story_views':
+                case 'instagram_followers':
                     const numericValue = typeof proofValue === 'string' ? parseInt(proofValue, 10) : proofValue;
                     const criteriaValue = parseInt(element.verificationCriteria, 10);
                     return !isNaN(numericValue) && !isNaN(criteriaValue) && numericValue >= criteriaValue;
                 default:
                     return false;
             }
-        } else if (element.type === 'social') {
-            const numericValue = typeof proofValue === 'string' ? parseInt(proofValue, 10) : proofValue;
-            const criteriaValue = parseInt(element.verificationCriteria, 10);
-            return !isNaN(numericValue) && !isNaN(criteriaValue) && numericValue >= criteriaValue;
         }
 
         return false;
     };
 
     const handleVerification = async (element: FormElement) => {
-        if (!element.githubVerificationType && !element.socialVerificationType) return;
+        if (!element.developerVerificationType && !element.socialVerificationType) return;
 
         const elementId = element.id;
         setProofDetails(prev => ({
@@ -143,8 +154,8 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
         setCurrentElement(element);
 
         try {
-            const providerId = element.type === 'github'
-                ? PROVIDER_IDS[`github_${element.githubVerificationType}`]
+            const providerId = element.type === 'developer'
+                ? PROVIDER_IDS[element.developerVerificationType!]
                 : PROVIDER_IDS[element.socialVerificationType!];
 
             const reclaimProofRequest = await ReclaimProofRequest.init(APP_ID, APP_SECRET, providerId);
@@ -172,8 +183,8 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                     toast({
                         title: isVerified ? "Verification Successful" : "Verification Failed",
                         description: isVerified
-                            ? `Your ${element.type === 'github' ? 'GitHub' : 'Social Media'} ${element.githubVerificationType || element.socialVerificationType} (${proofValue}) meets the criteria.`
-                            : `Your ${element.type === 'github' ? 'GitHub' : 'Social Media'} ${element.githubVerificationType || element.socialVerificationType} (${proofValue}) does not meet the criteria (${element.verificationCriteria}).`,
+                            ? `Your ${element.type} ${element.developerVerificationType || element.socialVerificationType} (${proofValue}) meets the criteria.`
+                            : `Your ${element.type} ${element.developerVerificationType || element.socialVerificationType} (${proofValue}) does not meet the criteria (${element.verificationCriteria}).`,
                         variant: isVerified ? "default" : "destructive",
                     });
                 },
@@ -218,7 +229,6 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
         e.preventDefault();
 
         try {
-            // Combine form data with proof details
             const formDataToSubmit = {
                 ...formData,
                 proofs: Object.entries(proofDetails).reduce((acc, [key, details]) => {
@@ -226,7 +236,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                         value: details.value,
                         isVerified: details.isVerified,
                         status: details.status,
-                        proofObject: details.proofObject, // Store the complete proof object
+                        proofObject: details.proofObject,
                         timestamp: new Date().toISOString()
                     };
                     return acc;
@@ -234,7 +244,6 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                 submittedAt: new Date().toISOString()
             };
 
-            // Add submission to Firestore
             await addDoc(collection(db, 'forms', formId, 'submissions'), formDataToSubmit);
 
             toast({
@@ -242,7 +251,6 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                 description: "Your form has been submitted successfully!",
             });
 
-            // Reset form state
             setFormData({});
             setProofDetails({});
         } catch (error) {
@@ -314,7 +322,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                             </SelectContent>
                         </Select>
                     )}
-                    {element.type === 'github' && (
+                    {(element.type === 'developer' || element.type === 'social') && (
                         <div className="space-y-2">
                             <Button
                                 type="button"
@@ -335,8 +343,13 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                                         ? 'Try Again'
                                         : proofDetails[element.id]?.status === 'verifying'
                                             ? 'Verifying...'
-                                            : `Prove GitHub ${element.githubVerificationType}`}
+                                            : `Prove ${element.type} ${element.developerVerificationType || element.socialVerificationType}`}
                             </Button>
+                            {/* {proofDetails[element.id]?.status === 'verified' && (
+                                <p className="text-green-500 text-sm">
+                                    Verified: {proofDetails[element.id].value} {element.type} {element.developerVerificationType || element.socialVerificationType}
+                                </p>
+                            )} */}
                         </div>
                     )}
                 </div>

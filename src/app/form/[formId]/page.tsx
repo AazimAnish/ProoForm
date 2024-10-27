@@ -9,12 +9,13 @@ import { doc, getDoc } from 'firebase/firestore';
 
 interface FormElement {
   id: string;
-  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'github';
+  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'developer' | 'social';
   label: string;
   options?: string[];
   required?: boolean;
   verificationCriteria?: string;
-  githubVerificationType?: 'username' | 'email' | 'contributions' | 'repos' | 'followers';
+  developerVerificationType?: 'github_followers' | 'github_email' | 'github_contributions' | 'github_repos' | 'leetcode_problems' | 'leetcode_streak' | 'codechef_ranking';
+  socialVerificationType?: 'linkedin_impressions' | 'youtube_views' | 'twitter_followers' | 'instagram_story_views' | 'instagram_followers';
 }
 
 export default function FormPage() {

@@ -23,13 +23,13 @@ import { Grip, Trash2, Plus, Minus } from "lucide-react";
 
 interface FormElement {
   id: string;
-  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'github' | 'social';
+  type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select' | 'developer' | 'social';
   label: string;
   options?: string[];
   required?: boolean;
   verificationCriteria?: string;
-  githubVerificationType?: 'username' | 'email' | 'contributions' | 'repos' | 'followers';
-  socialVerificationType?: 'twitter_followers' | 'instagram_story_views' | 'instagram_followers';
+  developerVerificationType?: 'github_followers' | 'github_email' | 'github_contributions' | 'github_repos' | 'leetcode_problems' | 'leetcode_streak' | 'codechef_ranking';
+  socialVerificationType?: 'linkedin_impressions' | 'youtube_views' | 'twitter_followers' | 'instagram_story_views' | 'instagram_followers';
 }
 
 interface FormFieldProps {
@@ -82,7 +82,7 @@ export function FormField({ element, onUpdate, onDelete }: FormFieldProps) {
                 <SelectItem value="checkbox">Checkbox</SelectItem>
                 <SelectItem value="radio">Multiple Choice</SelectItem>
                 <SelectItem value="select">Dropdown</SelectItem>
-                <SelectItem value="github">GitHub Verification</SelectItem>
+                <SelectItem value="developer">Software Developer Verification</SelectItem>
                 <SelectItem value="social">Social Media Verification</SelectItem>
               </SelectContent>
             </Select>
@@ -152,24 +152,26 @@ export function FormField({ element, onUpdate, onDelete }: FormFieldProps) {
             </div>
           )}
 
-          {element.type === 'github' && (
+          {element.type === 'developer' && (
             <div className="space-y-2">
-              <Label className="text-blue-200">GitHub Verification Type</Label>
+              <Label className="text-blue-200">Developer Verification Type</Label>
               <Select
-                value={element.githubVerificationType || ''}
+                value={element.developerVerificationType || ''}
                 onValueChange={(value) =>
-                  onUpdate({ ...element, githubVerificationType: value as FormElement['githubVerificationType'] })
+                  onUpdate({ ...element, developerVerificationType: value as FormElement['developerVerificationType'] })
                 }
               >
                 <SelectTrigger className="bg-blue-950/30 border-blue-800/30 text-blue-100">
-                  <SelectValue placeholder="Select GitHub verification type" />
+                  <SelectValue placeholder="Select verification type" />
                 </SelectTrigger>
                 <SelectContent className="bg-blue-950 border-blue-800">
-                  <SelectItem value="username">Username</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="contributions">Contributions</SelectItem>
-                  <SelectItem value="repos">Repositories</SelectItem>
-                  <SelectItem value="followers">Followers</SelectItem>
+                  <SelectItem value="github_followers">GitHub Followers</SelectItem>
+                  <SelectItem value="github_email">GitHub Email</SelectItem>
+                  <SelectItem value="github_contributions">GitHub Contributions</SelectItem>
+                  <SelectItem value="github_repos">GitHub Repositories</SelectItem>
+                  <SelectItem value="leetcode_problems">LeetCode Problems Solved</SelectItem>
+                  <SelectItem value="leetcode_streak">LeetCode Max Streak</SelectItem>
+                  <SelectItem value="codechef_ranking">CodeChef Ranking</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -188,6 +190,8 @@ export function FormField({ element, onUpdate, onDelete }: FormFieldProps) {
                   <SelectValue placeholder="Select social media verification type" />
                 </SelectTrigger>
                 <SelectContent className="bg-blue-950 border-blue-800">
+                  <SelectItem value="linkedin_impressions">LinkedIn Post Impressions</SelectItem>
+                  <SelectItem value="youtube_views">YouTube Channel Views</SelectItem>
                   <SelectItem value="twitter_followers">Twitter Followers</SelectItem>
                   <SelectItem value="instagram_story_views">Instagram Story Views</SelectItem>
                   <SelectItem value="instagram_followers">Instagram Followers</SelectItem>
@@ -196,35 +200,44 @@ export function FormField({ element, onUpdate, onDelete }: FormFieldProps) {
             </div>
           )}
 
-          {(element.type === 'github' && element.githubVerificationType) || 
-           (element.type === 'social' && element.socialVerificationType) ? (
+          {(element.type === 'developer' || element.type === 'social') && (element.developerVerificationType || element.socialVerificationType) && (
             <div className="space-y-2">
               <Label className="text-blue-200">Verification Criteria</Label>
               <Input
                 value={element.verificationCriteria || ''}
                 onChange={(e) => onUpdate({ ...element, verificationCriteria: e.target.value })}
                 placeholder={
-                  element.type === 'github' && (
-                    element.githubVerificationType === 'contributions' ||
-                    element.githubVerificationType === 'repos' ||
-                    element.githubVerificationType === 'followers'
-                  ) || element.type === 'social'
+                  element.developerVerificationType === 'github_contributions' ||
+                  element.developerVerificationType === 'github_repos' ||
+                  element.developerVerificationType === 'leetcode_problems' ||
+                  element.developerVerificationType === 'leetcode_streak' ||
+                  element.developerVerificationType === 'codechef_ranking' ||
+                  element.socialVerificationType === 'linkedin_impressions' ||
+                  element.socialVerificationType === 'youtube_views' ||
+                  element.socialVerificationType === 'twitter_followers' ||
+                  element.socialVerificationType === 'instagram_story_views' ||
+                  element.socialVerificationType === 'instagram_followers'
                     ? "Enter minimum number"
                     : "Enter expected value"
                 }
                 type={
-                  element.type === 'github' && (
-                    element.githubVerificationType === 'contributions' ||
-                    element.githubVerificationType === 'repos' ||
-                    element.githubVerificationType === 'followers'
-                  ) || element.type === 'social'
+                  element.developerVerificationType === 'github_contributions' ||
+                  element.developerVerificationType === 'github_repos' ||
+                  element.developerVerificationType === 'leetcode_problems' ||
+                  element.developerVerificationType === 'leetcode_streak' ||
+                  element.developerVerificationType === 'codechef_ranking' ||
+                  element.socialVerificationType === 'linkedin_impressions' ||
+                  element.socialVerificationType === 'youtube_views' ||
+                  element.socialVerificationType === 'twitter_followers' ||
+                  element.socialVerificationType === 'instagram_story_views' ||
+                  element.socialVerificationType === 'instagram_followers'
                     ? "number"
                     : "text"
                 }
                 className="bg-blue-950/30 border-blue-800/30 text-blue-100"
               />
             </div>
-          ) : null}
+          )}
 
           <div className="flex items-center justify-between">
             <Label className="text-blue-200">Required Field</Label>

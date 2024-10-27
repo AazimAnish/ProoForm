@@ -25,7 +25,7 @@ export interface FormElement {
 
 export default function FormBuilder() {
   const [formElements, setFormElements] = useState<FormElement[]>([]);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(false); 
   const [formId, setFormId] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const dragItem = useRef<number | null>(null);
@@ -165,20 +165,24 @@ export default function FormBuilder() {
           )}
 
           {/* Form Builder Card */}
-          <Card className="p-6 bg-blue-950/30 border-blue-800/50"> // Changed to blue
+          <Card className="p-6 bg-blue-950/30 border-blue-800/50">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-white">Form Builder</h2>
               <div className="flex gap-2">
                 <Button
-                  variant="outline"
-                  className="border-blue-800/50 text-blue-500" // Changed to blue
+                  variant={showPreview ? "default" : "outline"}
+                  className={`${
+                    showPreview 
+                      ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                      : "border-blue-800/50 text-blue-500"
+                  }`}
                   onClick={() => setShowPreview(!showPreview)}
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  Preview
+                  {showPreview ? "Hide Preview" : "Show Preview"}
                 </Button>
                 <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-white" // Changed to blue
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                   onClick={generateShareLink}
                 >
                   <LinkIcon className="w-4 h-4 mr-2" />
@@ -233,11 +237,13 @@ export default function FormBuilder() {
             </Button>
           </Card>
 
-          {/* Preview Panel */}
-          <Card className="p-6 bg-blue-950/30 border-blue-800/50"> // Changed to blue
-            <h2 className="text-2xl font-bold text-white mb-6">Preview</h2>
-            <FormPreview elements={formElements} />
-          </Card>
+          {/* Preview Panel - Only show when showPreview is true */}
+          {showPreview && (
+            <Card className="p-6 bg-blue-950/30 border-blue-800/50">
+              <h2 className="text-2xl font-bold text-white mb-6">Preview</h2>
+              <FormPreview elements={formElements} />
+            </Card>
+          )}
         </motion.div>
       </div>
     </div>

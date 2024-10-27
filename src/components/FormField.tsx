@@ -97,7 +97,7 @@ export function FormField({ element, onUpdate, onDelete }: FormFieldProps) {
             />
           </div>
 
-          {(element.type === 'radio' || element.type === 'select') && (
+          {(element.type === 'radio' || element.type === 'select' || element.type === 'checkbox') && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-blue-200">Options</Label>
@@ -118,8 +118,10 @@ export function FormField({ element, onUpdate, onDelete }: FormFieldProps) {
                         value={option}
                         onChange={(e) => {
                           const newOptions = [...(element.options || [])];
-                          newOptions[index] = e.target.value;
-                          onUpdate({ ...element, options: newOptions });
+                          if (e.target.value.trim()) {
+                            newOptions[index] = e.target.value;
+                            onUpdate({ ...element, options: newOptions });
+                          }
                         }}
                         className="bg-blue-950/30 border-blue-800/30 text-blue-100"
                       />
@@ -140,7 +142,7 @@ export function FormField({ element, onUpdate, onDelete }: FormFieldProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const newOptions = [...(element.options || []), ''];
+                      const newOptions = [...(element.options || []), ' '];
                       onUpdate({ ...element, options: newOptions });
                     }}
                     className="w-full border-blue-800/30 text-blue-500 hover:bg-blue-950/50"

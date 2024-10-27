@@ -288,21 +288,50 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                         />
                     )}
                     {element.type === 'checkbox' && (
-                        <Checkbox
-                            checked={formData[element.id] || false}
-                            onCheckedChange={(checked) => handleInputChange(element.id, checked)}
-                            className="border-blue-800/30 data-[state=checked]:bg-blue-600"
-                        />
+                        <div className="space-y-2">
+                            {element.options?.map((option) => (
+                                <div key={option} className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id={`${element.id}-${option}`}
+                                        checked={Array.isArray(formData[element.id]) && formData[element.id].includes(option)}
+                                        onCheckedChange={(checked) => {
+                                            const currentValues = Array.isArray(formData[element.id]) ? formData[element.id] : [];
+                                            const newValues = checked
+                                                ? [...currentValues, option]
+                                                : currentValues.filter((value: string) => value !== option);
+                                            handleInputChange(element.id, newValues);
+                                        }}
+                                        className="border-blue-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                                    />
+                                    <label
+                                        htmlFor={`${element.id}-${option}`}
+                                        className="text-white text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        {option}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
                     )}
                     {element.type === 'radio' && (
                         <RadioGroup
                             value={formData[element.id] || ''}
                             onValueChange={(value) => handleInputChange(element.id, value)}
+                            className="space-y-2"
                         >
                             {element.options?.map((option) => (
                                 <div key={option} className="flex items-center space-x-2">
-                                    <RadioGroupItem value={option} id={`${element.id}-${option}`} />
-                                    <label htmlFor={`${element.id}-${option}`}>{option}</label>
+                                    <RadioGroupItem 
+                                        value={option} 
+                                        id={`${element.id}-${option}`}
+                                        className="border-blue-400 text-blue-600"
+                                    />
+                                    <label 
+                                        htmlFor={`${element.id}-${option}`}
+                                        className="text-white text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        {option}
+                                    </label>
                                 </div>
                             ))}
                         </RadioGroup>
@@ -315,9 +344,15 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                             <SelectTrigger className="bg-blue-950/30 border-blue-800/30 text-blue-100">
                                 <SelectValue placeholder="Select an option" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-blue-950 border-blue-800">
                                 {element.options?.map((option) => (
-                                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                                    <SelectItem 
+                                        key={option} 
+                                        value={option}
+                                        className="text-blue-100 hover:bg-blue-900 focus:bg-blue-900 focus:text-white"
+                                    >
+                                        {option}
+                                    </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>

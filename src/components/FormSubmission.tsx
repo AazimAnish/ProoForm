@@ -19,6 +19,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { ToastAction } from "@/components/ui/toast";
 
 interface FormElement {
     id: string;
@@ -179,6 +180,9 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                         }
                     }));
 
+                    // Save the verified value to formData
+                    handleInputChange(elementId, proofValue);
+
                     setIsDialogOpen(false);
                     toast({
                         title: isVerified ? "Verification Successful" : "Verification Failed",
@@ -186,6 +190,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                             ? `Your ${element.type} ${element.developerVerificationType || element.socialVerificationType} (${proofValue}) meets the criteria.`
                             : `Your ${element.type} ${element.developerVerificationType || element.socialVerificationType} (${proofValue}) does not meet the criteria (${element.verificationCriteria}).`,
                         variant: isVerified ? "default" : "destructive",
+                        action: isVerified ? undefined : <ToastAction altText="Try Again">Try Again</ToastAction>
                     });
                 },
                 onError: (error: Error) => {
@@ -203,6 +208,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                         title: "Verification Failed",
                         description: error.message || "An error occurred during verification.",
                         variant: "destructive",
+                        action: <ToastAction altText="Try Again">Try Again</ToastAction>
                     });
                 }
             });
@@ -221,6 +227,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                 title: "Verification Error",
                 description: "An error occurred during the verification process. Please try again later.",
                 variant: "destructive",
+                action: <ToastAction altText="Try Again">Try Again</ToastAction>
             });
         }
     };
@@ -228,9 +235,39 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Check if all required fields are filled
+        const missingRequired = elements.filter(element => 
+            element.required && !formData[element.id]
+        );
+
+        if (missingRequired.length > 0) {
+            toast({
+                title: "Missing Required Fields",
+                description: `Please fill in: ${missingRequired.map(el => el.label).join(', ')}`,
+                variant: "destructive",
+            });
+            return;
+        }
+
+        // Check if all verification proofs are completed
+        const missingProofs = elements.filter(element => 
+            (element.type === 'developer' || element.type === 'social') &&
+            (!proofDetails[element.id] || !proofDetails[element.id].isVerified)
+        );
+
+        if (missingProofs.length > 0) {
+            toast({
+                title: "Missing Verifications",
+                description: `Please complete verification for: ${missingProofs.map(el => el.label).join(', ')}`,
+                variant: "destructive",
+            });
+            return;
+        }
+
         try {
-            const formDataToSubmit = {
-                ...formData,
+            const submissionData = {
+                formId,
+                formData,
                 proofs: Object.entries(proofDetails).reduce((acc, [key, details]) => {
                     acc[key] = {
                         value: details.value,
@@ -244,21 +281,35 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                 submittedAt: new Date().toISOString()
             };
 
-            await addDoc(collection(db, 'forms', formId, 'submissions'), formDataToSubmit);
+            // Save to submissions collection
+            const docRef = await addDoc(collection(db, 'submissions'), submissionData);
 
-            toast({
-                title: "Form Submitted",
-                description: "Your form has been submitted successfully!",
-            });
+            if (docRef.id) {
+                toast({
+                    title: "Success! 🎉",
+                    description: "Your form has been submitted successfully.",
+                    variant: "default", // or create a "success" variant
+                });
 
-            setFormData({});
-            setProofDetails({});
+                // Reset form after successful submission
+                setFormData({});
+                setProofDetails({});
+            } else {
+                throw new Error("Failed to get submission ID");
+            }
         } catch (error) {
-            console.error("Error submitting form: ", error);
+            console.error("Error submitting form:", error);
             toast({
-                title: "Submission Error",
-                description: error instanceof Error ? error.message : "Error submitting form. Please try again.",
+                title: "Submission Failed ❌",
+                description: error instanceof Error 
+                    ? error.message 
+                    : "There was an error submitting your form. Please try again.",
                 variant: "destructive",
+                action: (
+                    <ToastAction altText="Try again" onClick={() => handleSubmit(e)}>
+                        Try again
+                    </ToastAction>
+                ),
             });
         }
     };
@@ -382,7 +433,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                             </Button>
                             {/* {proofDetails[element.id]?.status === 'verified' && (
                                 <p className="text-green-500 text-sm">
-                                    Verified: {proofDetails[element.id].value} {element.type} {element.developerVerificationType || element.socialVerificationType}
+                                    Verified Value: {proofDetails[element.id].value}
                                 </p>
                             )} */}
                         </div>
@@ -403,7 +454,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                     </DialogHeader>
                     <div className="flex flex-col items-center justify-center py-4">
                         {qrCodeUrl ? (
-                            <QRCodeSVG value={qrCodeUrl} size={256} />
+                            <QRCodeSVG value={qrCodeUrl} size={256} bgColor="#fff" />
                         ) : (
                             <div className="text-center">
                                 <p className="text-lg font-semibold mb-2">Generating QR Code...</p>

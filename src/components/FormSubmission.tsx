@@ -9,7 +9,7 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ReclaimProofRequest } from '@reclaimprotocol/js-sdk';
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, Copy, Navigation, XCircle } from "lucide-react";
 import { QRCodeSVG } from 'qrcode.react';
 import {
     Dialog,
@@ -55,7 +55,7 @@ const PROVIDER_IDS: Record<string, string> = {
     leetcode_problems: process.env.NEXT_PUBLIC_LEETCODE_PROVIDER_PROBLEMS || '',
     leetcode_streak: process.env.NEXT_PUBLIC_LEETCODE_PROVIDER_STREAK || '',
     codechef_ranking: process.env.NEXT_PUBLIC_CODECHEF_PROVIDER_RANKING || '',
-    
+
     // Social media verification providers
     twitter_followers: process.env.NEXT_PUBLIC_TWITTER_FOLLOWERS_COUNT || '',
     instagram_story_views: process.env.NEXT_PUBLIC_INSTAGRAM_STORY_VIEW || '',
@@ -236,7 +236,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
         e.preventDefault();
 
         // Check if all required fields are filled
-        const missingRequired = elements.filter(element => 
+        const missingRequired = elements.filter(element =>
             element.required && !formData[element.id]
         );
 
@@ -250,7 +250,7 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
         }
 
         // Check if all verification proofs are completed
-        const missingProofs = elements.filter(element => 
+        const missingProofs = elements.filter(element =>
             (element.type === 'developer' || element.type === 'social') &&
             (!proofDetails[element.id] || !proofDetails[element.id].isVerified)
         );
@@ -301,8 +301,8 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
             console.error("Error submitting form:", error);
             toast({
                 title: "Submission Failed ❌",
-                description: error instanceof Error 
-                    ? error.message 
+                description: error instanceof Error
+                    ? error.message
                     : "There was an error submitting your form. Please try again.",
                 variant: "destructive",
                 action: (
@@ -372,12 +372,12 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                         >
                             {element.options?.map((option) => (
                                 <div key={option} className="flex items-center space-x-2">
-                                    <RadioGroupItem 
-                                        value={option} 
+                                    <RadioGroupItem
+                                        value={option}
                                         id={`${element.id}-${option}`}
                                         className="border-blue-400 text-blue-600"
                                     />
-                                    <label 
+                                    <label
                                         htmlFor={`${element.id}-${option}`}
                                         className="text-white text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                     >
@@ -397,8 +397,8 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                             </SelectTrigger>
                             <SelectContent className="bg-blue-950 border-blue-800">
                                 {element.options?.map((option) => (
-                                    <SelectItem 
-                                        key={option} 
+                                    <SelectItem
+                                        key={option}
                                         value={option}
                                         className="text-blue-100 hover:bg-blue-900 focus:bg-blue-900 focus:text-white"
                                     >
@@ -413,10 +413,10 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                             <Button
                                 type="button"
                                 className={`${proofDetails[element.id]?.status === 'verified'
-                                        ? 'bg-green-600 hover:bg-green-700'
-                                        : proofDetails[element.id]?.status === 'failed'
-                                            ? 'bg-blue-600 hover:bg-blue-700'
-                                            : 'bg-blue-600 hover:bg-blue-700'
+                                    ? 'bg-green-600 hover:bg-green-700'
+                                    : proofDetails[element.id]?.status === 'failed'
+                                        ? 'bg-blue-600 hover:bg-blue-700'
+                                        : 'bg-blue-600 hover:bg-blue-700'
                                     } text-white flex items-center justify-center`}
                                 onClick={() => handleVerification(element)}
                                 disabled={proofDetails[element.id]?.status === 'verifying'}
@@ -454,7 +454,35 @@ export function FormSubmission({ formId, elements }: FormSubmissionProps) {
                     </DialogHeader>
                     <div className="flex flex-col items-center justify-center py-4">
                         {qrCodeUrl ? (
-                            <QRCodeSVG value={qrCodeUrl} size={256} bgColor="#fff" />
+                            <>
+                                <QRCodeSVG value={qrCodeUrl} size={256} bgColor="#fff" />
+                                <div className="mt-4 w-full flex flex-col gap-2">
+                                    <Input
+                                        value={qrCodeUrl}
+                                        readOnly
+                                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                        placeholder="Verification Link"
+                                    />
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <Button
+                                            className="bg-blue-600 hover:bg-blue-700 text-white w-full"
+                                            onClick={() => navigator.clipboard.writeText(qrCodeUrl)}
+                                        >
+                                            <Copy className="w-5 h-5 mr-2" />
+                                            Copy
+                                        </Button>
+                                        <a
+                                            href={qrCodeUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                        >
+                                            <Navigation className="w-5 h-5 mr-2" />
+                                            Navigate
+                                        </a>
+                                    </div>
+                                </div>
+                            </>
                         ) : (
                             <div className="text-center">
                                 <p className="text-lg font-semibold mb-2">Generating QR Code...</p>
